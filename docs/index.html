@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DELTA-TTS</title>
+  <meta name="description" content="Audio samples for DELTA-TTS (NeurIPS 2026), which adapts a pretrained autoregressive TTS model into a discrete diffusion language model.">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+</head>
+<body>
+<main class="container">
+
+  <!-- ===================== Header ===================== -->
+  <section class="section-card">
+    <div class="text-center">
+      <h1 class="title">DELTA-TTS:</h1>
+      <h3 class="subtitle">Adapting Autoregressive Model into Diffusion Language Model for Text-to-Speech</h3>
+      <p class="venue">| <span>NeurIPS 2026</span> |</p>
+      <div class="authors">
+        <span>Junwon Moon<sup>1</sup></span>,
+        <span>Yejin Lee<sup>1</sup></span>,
+        <span>Seungbeom Kim<sup>1</sup></span>,
+        <span>Hoseong Ahn<sup>1</sup></span>,
+        <span>Sewoong Park<sup>1</sup></span>,
+        <span>Heeseung Kim<sup>2</sup></span>,
+        <span>Kyuhong Shim<sup>1</sup></span>
+      </div>
+      <p class="affiliations"><sup>1</sup>Sungkyunkwan University&emsp;<sup>2</sup>University of Seoul</p>
+      <p class="badges">
+        <!-- TODO: once the NeurIPS 2026 forum is public, make this a link and re-download the badge as OpenReview-NeurIPS_2026 -->
+        <span class="badge-soon"><img src="assets/badges/openreview.svg" alt="OpenReview: Coming Soon"></span>
+        <a href="https://arxiv.org/abs/2607.04140" target="_blank" rel="noopener"><img src="assets/badges/arxiv.svg" alt="arXiv: Paper"></a>
+        <a href="https://huggingface.co/slpr-lab/DELTA-TTS" target="_blank" rel="noopener"><img src="assets/badges/huggingface.svg" alt="Hugging Face: Model"></a>
+        <a href="https://github.com/slpr-lab/DELTA-TTS" target="_blank" rel="noopener"><img src="assets/badges/github.svg" alt="GitHub: Code"></a>
+      </p>
+    </div>
+
+    <p class="abstract">
+      <b>Abstract.</b>
+      Autoregressive (AR) text-to-speech (TTS) models generate discrete speech tokens sequentially, which makes inference slow and can degrade robustness, since local errors propagate to later positions and can escalate into hallucination.
+      This limitation stems from their left-to-right AR commitment: each token must be determined before future speech-token context is available.
+      However, such ordering is not an inherent requirement for TTS, since the model receives the full input text before synthesis.
+      In this paper, we introduce DELTA-TTS, a lightweight LoRA-based adaptation framework that converts a pretrained AR TTS model into a discrete diffusion language model (dLLM) for confidence-ordered speech-token decoding.
+      To better capture the local structure of speech, DELTA-TTS incorporates a convolution module that injects local acoustic context, together with a <span class="nowrap">1/<i>t</i>-weighted</span> training objective and a time-shifted inference schedule that together defer low-confidence positions to later steps.
+      Trained on only 585 hours of LibriTTS, DELTA-TTS achieves a 1.75% WER on Seed-TTS test-en, outperforming its AR backbone while generating tokens 3.3 times faster.
+      Further analysis shows that DELTA-TTS produces sharper text&ndash;speech alignment, increases overall decoding confidence, and mitigates the hallucinations observed in AR generation.
+    </p>
+
+    <p class="mb-1"><b>Contents</b></p>
+    <ul class="contents">
+      <li><a href="#overview">Model Overview</a></li>
+      <li><a href="#zero-shot">Zero-Shot TTS on Seed-TTS test-en</a></li>
+      <li><a href="#librispeech">Zero-Shot TTS on LibriSpeech</a></li>
+    </ul>
+  </section>
+
+  <!-- ===================== Overview ===================== -->
+  <section class="section-card" id="overview">
+    <h2 class="section-title">Model Overview</h2>
+    <figure class="paper-figure">
+      <img src="figures/architecture.png" alt="Overview of DELTA-TTS: an autoregressive TTS model decodes one token per step with causal attention, speech-aware adaptation converts the attention mask to bidirectional and adds LoRA and a convolution block, and DELTA-TTS decodes several tokens per step in confidence order.">
+      <figcaption>
+        <b>Figure 1:</b> Overview of DELTA-TTS.
+        A pretrained AR TTS backbone is converted into a discrete diffusion language model with two adaptations: bidirectional attention and block-wise LoRA with a Conformer-style convolution module.
+      </figcaption>
+    </figure>
+  </section>
+
+  <!-- ===================== Zero-shot samples ===================== -->
+  <section class="section-card" id="zero-shot">
+    <h2 class="section-title">Zero-Shot TTS on Seed-TTS test-en</h2>
+    <div class="table-responsive">
+      <table class="table table-hover sample-table zs-table">
+        <thead>
+          <tr>
+            <th>Prompt</th>
+            <th class="col-text">Text</th>
+            <th>Ground Truth</th>
+            <th>CosyVoice 3 (AR)</th>
+            <th class="ours">DELTA-TTS (Ours)</th>
+          </tr>
+        </thead>
+        <tbody>
+<!-- BEGIN zero-shot rows (generated by tools/build_samples.py; edits here are overwritten) -->
+          <tr>
+            <td data-label="Prompt"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_17267923-common_voice_en_17267922_prompt.wav"></audio><span class="prompt-text">I pressed the button for my nurse, but he did not come.</span></td>
+            <td class="text-cell" data-label="Text">Can we please leave now?</td>
+            <td data-label="Ground Truth"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_17267923-common_voice_en_17267922_gt.wav"></audio></td>
+            <td data-label="CosyVoice 3 (AR)"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_17267923-common_voice_en_17267922_cv3.wav"></audio></td>
+            <td data-label="DELTA-TTS (Ours)"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_17267923-common_voice_en_17267922_delta.wav"></audio></td>
+          </tr>
+          <tr>
+            <td data-label="Prompt"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_18229682-common_voice_en_18229679_prompt.wav"></audio><span class="prompt-text">The fruit of a fig tree is apple shaped.</span></td>
+            <td class="text-cell" data-label="Text">Rated M for mature.</td>
+            <td data-label="Ground Truth"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_18229682-common_voice_en_18229679_gt.wav"></audio></td>
+            <td data-label="CosyVoice 3 (AR)"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_18229682-common_voice_en_18229679_cv3.wav"></audio></td>
+            <td data-label="DELTA-TTS (Ours)"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_18229682-common_voice_en_18229679_delta.wav"></audio></td>
+          </tr>
+          <tr>
+            <td data-label="Prompt"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_19748971-common_voice_en_19748974_prompt.wav"></audio><span class="prompt-text">The school is considered to be both economically and ethnically diverse.</span></td>
+            <td class="text-cell" data-label="Text">Some resemble a tulip or a goblet.</td>
+            <td data-label="Ground Truth"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_19748971-common_voice_en_19748974_gt.wav"></audio></td>
+            <td data-label="CosyVoice 3 (AR)"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_19748971-common_voice_en_19748974_cv3.wav"></audio></td>
+            <td data-label="DELTA-TTS (Ours)"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_19748971-common_voice_en_19748974_delta.wav"></audio></td>
+          </tr>
+          <tr>
+            <td data-label="Prompt"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_37232389-common_voice_en_37190783_prompt.wav"></audio><span class="prompt-text">The island&#x27;s southern end connects by roadway to Padre Island.</span></td>
+            <td class="text-cell" data-label="Text">Will you be happy when I am in the earth?</td>
+            <td data-label="Ground Truth"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_37232389-common_voice_en_37190783_gt.wav"></audio></td>
+            <td data-label="CosyVoice 3 (AR)"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_37232389-common_voice_en_37190783_cv3.wav"></audio></td>
+            <td data-label="DELTA-TTS (Ours)"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_37232389-common_voice_en_37190783_delta.wav"></audio></td>
+          </tr>
+          <tr>
+            <td data-label="Prompt"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_22728555-common_voice_en_22728571_prompt.wav"></audio><span class="prompt-text">Many planes would be lost if they could not see their carriers.</span></td>
+            <td class="text-cell" data-label="Text">In the grammars of many languages the two terms are used interchangeably.</td>
+            <td data-label="Ground Truth"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_22728555-common_voice_en_22728571_gt.wav"></audio></td>
+            <td data-label="CosyVoice 3 (AR)"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_22728555-common_voice_en_22728571_cv3.wav"></audio></td>
+            <td data-label="DELTA-TTS (Ours)"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_22728555-common_voice_en_22728571_delta.wav"></audio></td>
+          </tr>
+          <tr>
+            <td data-label="Prompt"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_19724030-common_voice_en_19724029_prompt.wav"></audio><span class="prompt-text">Gum arabic is used primarily in the food industry as a stabilizer.</span></td>
+            <td class="text-cell" data-label="Text">One variation assigns a point based on the pair rolled, rather than the singleton.</td>
+            <td data-label="Ground Truth"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_19724030-common_voice_en_19724029_gt.wav"></audio></td>
+            <td data-label="CosyVoice 3 (AR)"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_19724030-common_voice_en_19724029_cv3.wav"></audio></td>
+            <td data-label="DELTA-TTS (Ours)"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_19724030-common_voice_en_19724029_delta.wav"></audio></td>
+          </tr>
+          <tr>
+            <td data-label="Prompt"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_19845853-common_voice_en_19845856_prompt.wav"></audio><span class="prompt-text">The western rim of Roche has been somewhat distorted and straightened.</span></td>
+            <td class="text-cell" data-label="Text">The ninth member is the State Superintendent of Education who is ex-officio.</td>
+            <td data-label="Ground Truth"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_19845853-common_voice_en_19845856_gt.wav"></audio></td>
+            <td data-label="CosyVoice 3 (AR)"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_19845853-common_voice_en_19845856_cv3.wav"></audio></td>
+            <td data-label="DELTA-TTS (Ours)"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_19845853-common_voice_en_19845856_delta.wav"></audio></td>
+          </tr>
+          <tr>
+            <td data-label="Prompt"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_19619855-common_voice_en_19619858_prompt.wav"></audio><span class="prompt-text">The east terrace would also have a roof added as part of this development.</span></td>
+            <td class="text-cell" data-label="Text">Excessive efforts to control or exploit agents of influence can also have negative consequences.</td>
+            <td data-label="Ground Truth"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_19619855-common_voice_en_19619858_gt.wav"></audio></td>
+            <td data-label="CosyVoice 3 (AR)"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_19619855-common_voice_en_19619858_cv3.wav"></audio></td>
+            <td data-label="DELTA-TTS (Ours)"><audio controls preload="metadata" src="audio/zeroshot/common_voice_en_19619855-common_voice_en_19619858_delta.wav"></audio></td>
+          </tr>
+<!-- END zero-shot rows -->
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ===================== LibriSpeech (VALL-E demo samples) ===================== -->
+  <section class="section-card" id="librispeech">
+    <h2 class="section-title">Zero-Shot TTS on LibriSpeech</h2>
+    <div class="table-responsive">
+      <table class="table table-hover sample-table libri-table">
+        <thead>
+          <tr>
+            <th>Prompt</th>
+            <th class="col-text">Text</th>
+            <th>Ground Truth</th>
+            <th>VALL-E</th>
+            <th>CosyVoice 3 (AR)</th>
+            <th>DELTA-TTS (Ours)</th>
+          </tr>
+        </thead>
+        <tbody>
+<!-- BEGIN librispeech rows (generated by tools/build_samples.py; edits here are overwritten) -->
+          <tr>
+            <td data-label="Prompt"><audio controls preload="metadata" src="audio/librispeech/valle_809_prompt.wav"></audio><span class="prompt-text">They then renewed their journey, and, under the better light, made a safe crossing of the stable roofs.</span></td>
+            <td class="text-cell" data-label="Text">They moved thereafter cautiously about the hut groping before and about them to find something to show that Warrenton had fulfilled his mission</td>
+            <td data-label="Ground Truth"><audio controls preload="metadata" src="audio/librispeech/valle_809_gt.wav"></audio></td>
+            <td data-label="VALL-E"><audio controls preload="metadata" src="audio/librispeech/valle_809_valle.wav"></audio></td>
+            <td data-label="CosyVoice 3 (AR)"><audio controls preload="metadata" src="audio/librispeech/valle_809_cv3.wav"></audio></td>
+            <td data-label="DELTA-TTS (Ours)"><audio controls preload="metadata" src="audio/librispeech/valle_809_delta.wav"></audio></td>
+          </tr>
+          <tr>
+            <td data-label="Prompt"><audio controls preload="metadata" src="audio/librispeech/valle_1216_prompt.wav"></audio><span class="prompt-text">and says thou mother of my children i have loved thee and i have given thee a crown that none can take away</span></td>
+            <td class="text-cell" data-label="Text">And lay me down in thy cold bed and leave my shining lot</td>
+            <td data-label="Ground Truth"><audio controls preload="metadata" src="audio/librispeech/valle_1216_gt.wav"></audio></td>
+            <td data-label="VALL-E"><audio controls preload="metadata" src="audio/librispeech/valle_1216_valle.wav"></audio></td>
+            <td data-label="CosyVoice 3 (AR)"><audio controls preload="metadata" src="audio/librispeech/valle_1216_cv3.wav"></audio></td>
+            <td data-label="DELTA-TTS (Ours)"><audio controls preload="metadata" src="audio/librispeech/valle_1216_delta.wav"></audio></td>
+          </tr>
+          <tr>
+            <td data-label="Prompt"><audio controls preload="metadata" src="audio/librispeech/valle_1_prompt.wav"></audio><span class="prompt-text">After early nightfall the yellow lamps would light up here and there the squalid quarter of the brothels.</span></td>
+            <td class="text-cell" data-label="Text">Number ten fresh nelly is waiting on you good night husband</td>
+            <td data-label="Ground Truth"><audio controls preload="metadata" src="audio/librispeech/valle_1_gt.wav"></audio></td>
+            <td data-label="VALL-E"><audio controls preload="metadata" src="audio/librispeech/valle_1_valle.wav"></audio></td>
+            <td data-label="CosyVoice 3 (AR)"><audio controls preload="metadata" src="audio/librispeech/valle_1_cv3.wav"></audio></td>
+            <td data-label="DELTA-TTS (Ours)"><audio controls preload="metadata" src="audio/librispeech/valle_1_delta.wav"></audio></td>
+          </tr>
+          <tr>
+            <td data-label="Prompt"><audio controls preload="metadata" src="audio/librispeech/valle_74_prompt.wav"></audio><span class="prompt-text">she screamed and shouted too with a terrific volume of sound which doubtless caused the hearts of the fugitives to quake within them</span></td>
+            <td class="text-cell" data-label="Text">Yea his honourable worship is within but he hath a godly minister or two with him and likewise a leech</td>
+            <td data-label="Ground Truth"><audio controls preload="metadata" src="audio/librispeech/valle_74_gt.wav"></audio></td>
+            <td data-label="VALL-E"><audio controls preload="metadata" src="audio/librispeech/valle_74_valle.wav"></audio></td>
+            <td data-label="CosyVoice 3 (AR)"><audio controls preload="metadata" src="audio/librispeech/valle_74_cv3.wav"></audio></td>
+            <td data-label="DELTA-TTS (Ours)"><audio controls preload="metadata" src="audio/librispeech/valle_74_delta.wav"></audio></td>
+          </tr>
+          <tr>
+            <td data-label="Prompt"><audio controls preload="metadata" src="audio/librispeech/valle_78_prompt.wav"></audio><span class="prompt-text">his hat had a peaked crown at a flat brim and around the brim was a row of tiny golden bells that tinkled when he moved</span></td>
+            <td class="text-cell" data-label="Text">Instead of shoes the old man wore boots with turnover tops and his blue coat had wide cuffs of gold braid</td>
+            <td data-label="Ground Truth"><audio controls preload="metadata" src="audio/librispeech/valle_78_gt.wav"></audio></td>
+            <td data-label="VALL-E"><audio controls preload="metadata" src="audio/librispeech/valle_78_valle.wav"></audio></td>
+            <td data-label="CosyVoice 3 (AR)"><audio controls preload="metadata" src="audio/librispeech/valle_78_cv3.wav"></audio></td>
+            <td data-label="DELTA-TTS (Ours)"><audio controls preload="metadata" src="audio/librispeech/valle_78_delta.wav"></audio></td>
+          </tr>
+          <tr>
+            <td data-label="Prompt"><audio controls preload="metadata" src="audio/librispeech/valle_509_prompt.wav"></audio><span class="prompt-text">Oh, what a record to read! What a picture to gaze upon! How awful the fact!</span></td>
+            <td class="text-cell" data-label="Text">The army found the people in poverty and left them in comparative wealth</td>
+            <td data-label="Ground Truth"><audio controls preload="metadata" src="audio/librispeech/valle_509_gt.wav"></audio></td>
+            <td data-label="VALL-E"><audio controls preload="metadata" src="audio/librispeech/valle_509_valle.wav"></audio></td>
+            <td data-label="CosyVoice 3 (AR)"><audio controls preload="metadata" src="audio/librispeech/valle_509_cv3.wav"></audio></td>
+            <td data-label="DELTA-TTS (Ours)"><audio controls preload="metadata" src="audio/librispeech/valle_509_delta.wav"></audio></td>
+          </tr>
+          <tr>
+            <td data-label="Prompt"><audio controls preload="metadata" src="audio/librispeech/valle_719_prompt.wav"></audio><span class="prompt-text">Choking with emotion, Leocadia made a sign to her parents that she wished to be alone with them.</span></td>
+            <td class="text-cell" data-label="Text">Thus did this humane and right minded father comfort his unhappy daughter and her mother embracing her again did all she could to soothe her feelings</td>
+            <td data-label="Ground Truth"><audio controls preload="metadata" src="audio/librispeech/valle_719_gt.wav"></audio></td>
+            <td data-label="VALL-E"><audio controls preload="metadata" src="audio/librispeech/valle_719_valle.wav"></audio></td>
+            <td data-label="CosyVoice 3 (AR)"><audio controls preload="metadata" src="audio/librispeech/valle_719_cv3.wav"></audio></td>
+            <td data-label="DELTA-TTS (Ours)"><audio controls preload="metadata" src="audio/librispeech/valle_719_delta.wav"></audio></td>
+          </tr>
+          <tr>
+            <td data-label="Prompt"><audio controls preload="metadata" src="audio/librispeech/valle_801_prompt.wav"></audio><span class="prompt-text">Most of all, Robin thought of his father. What would he counsel?</span></td>
+            <td class="text-cell" data-label="Text">He was in deep converse with the clerk and entered the hall holding him by the arm</td>
+            <td data-label="Ground Truth"><audio controls preload="metadata" src="audio/librispeech/valle_801_gt.wav"></audio></td>
+            <td data-label="VALL-E"><audio controls preload="metadata" src="audio/librispeech/valle_801_valle.wav"></audio></td>
+            <td data-label="CosyVoice 3 (AR)"><audio controls preload="metadata" src="audio/librispeech/valle_801_cv3.wav"></audio></td>
+            <td data-label="DELTA-TTS (Ours)"><audio controls preload="metadata" src="audio/librispeech/valle_801_delta.wav"></audio></td>
+          </tr>
+<!-- END librispeech rows -->
+        </tbody>
+      </table>
+    </div>
+    <p class="source-note">Prompts, ground truth and VALL-E samples are taken from the <a href="https://www.microsoft.com/en-us/research/project/vall-e-x/vall-e/" target="_blank" rel="noopener">VALL-E demo page</a>.</p>
+  </section>
+
+</main>
+<footer class="site-footer">
+  <a href="#">Back to top</a>
+</footer>
+</body>
+</html>

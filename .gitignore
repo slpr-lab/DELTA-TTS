@@ -1,0 +1,9 @@
+tools/
+.venv/
+__pycache__/
+*.pyc
+pretrained_models/
+outputs/
+third_party/checkpoints/
+*.wav
+!docs/**/*.wav

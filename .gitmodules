@@ -1,0 +1,7 @@
+[submodule "third_party/CosyVoice"]
+	path = third_party/CosyVoice
+	url = https://github.com/FunAudioLLM/CosyVoice.git
+[submodule "third_party/F5-TTS"]
+	path = third_party/F5-TTS
+	url = https://github.com/SWivid/F5-TTS.git
+	ignore = untracked
